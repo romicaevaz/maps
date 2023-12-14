@@ -9,9 +9,24 @@
     <style>
         body { margin: 0; padding: 0; }
         html, body, #map { height: 100%; width: 100%; }
+        #search-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+        }
+
+        #search-box {
+            padding: 10px;
+            font-size: 14px;
+            width: 200px;
+        }
     </style>
 </head>
 <body>
+<div id="search-container">
+    <input id="search-box" type="text" placeholder="Search for an address"/>
+</div>
 <div id="map"></div>
 <script>
     mapboxgl.accessToken = 'pk.eyJ1Ijoicm9taWMtYWV2YXoiLCJhIjoiY2xxNGswcWpoMDdkYjJyb2hjbjNjMTRhZCJ9.-1SWxlT_lF7IOkwNDUvnQQ';
@@ -20,6 +35,17 @@
         style: 'mapbox://styles/romic-aevaz/clq4q0cvf001y01pxeyz921nh', // style URL
         center: [-97.7, 30.2], // starting position [lng, lat]
         zoom: 9, // starting zoom
+    });
+    document.getElementById('search-box').addEventListener('change', function(e) {
+        var query = e.target.value;
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.features.length) {
+                    const { center } = data.features[0];
+                    map.flyTo({ center: center, zoom: 15 });
+                }
+            });
     });
 </script>
 </body>
